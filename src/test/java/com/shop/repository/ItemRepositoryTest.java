@@ -130,7 +130,8 @@ class ItemRepositoryTest {
         this.createItemList();
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QItem qItem = QItem.item;
-        JPAQuery<Item> query = queryFactory.selectFrom(qItem).where(qItem.itemSellStatus.eq(ItemSellStatus.SELL))
+        JPAQuery<Item> query = queryFactory.selectFrom(qItem)
+                .where(qItem.itemSellStatus.eq(ItemSellStatus.SELL))
                 .where(qItem.itemDetail.like("%" + "테스트 상품 상세 설명" + "%"))
                 .orderBy(qItem.price.desc());
 
@@ -140,9 +141,9 @@ class ItemRepositoryTest {
             System.out.println(item.toString());
         }
     }
-    /** 상품 데이터를 만드는 새로운 메소드를 만든다. 1번부터 5번 상품은 상품의 판매상태를 SELL(판매중)으로 지정하는 메소드 */
+
     public void createItemList2() {
-        for(int i = 1; i <= 5; i++) {
+        for(int i = 1; i <=5; i++) {
             Item item = new Item();
             item.setItemNm("테스트 상품" + i);
             item.setPrice(10000 + i);
@@ -153,7 +154,7 @@ class ItemRepositoryTest {
             item.setUpdateTime(LocalDateTime.now());
             itemRepository.save(item);
         }
-        /** 상품 데이터를 만드는 새로운 메소드를 만든다. 6번부터 10번 상품은 상품의 판매상태를 SOLD_OUT(품절)으로 지정하는 메소드 */
+
         for(int i = 6; i <= 10; i++) {
             Item item = new Item();
             item.setItemNm("테스트 상품" + i);
@@ -168,42 +169,32 @@ class ItemRepositoryTest {
     }
 
     @Test
-    @DisplayName("상품 Querydls 조회 테스트2")
+    @DisplayName("상품 Querydsl 조회테스트 2")
     public void queryDslTest2() {
 
         this.createItemList2();
 
-        BooleanBuilder booleanBuilder = new BooleanBuilder();           // BooleanBuilder는 쿼리에 들어갈 조건을 만들어 주는 빌더.
-                                                                        // Predicate를 구현하고 있으며 메소드 체인 형식으로 사용할 수 있음.
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
         QItem item = QItem.item;
         String itemDetail = "테스트 상품 상세 설명";
         int price = 10003;
-        String iemSellStat = "SELL";
+        String itemSellStat = "SELL";
 
         booleanBuilder.and(item.itemDetail.like("%" + itemDetail + "%"));
         booleanBuilder.and(item.price.gt(price));
-        System.out.println(ItemSellStatus.SELL);
 
-        if (StringUtils.equals(item.itemSellStatus, ItemSellStatus.SELL)) {
+        if(StringUtils.equals(itemSellStat, ItemSellStatus.SELL)) {
             booleanBuilder.and(item.itemSellStatus.eq(ItemSellStatus.SELL));
         }
-        // 필요한 상품을 조회하는 필요한 "and" 조건을 추가하고 있다. 아래 소스에서 상품의 판매상태가 SELL일 때만
-        // booleanBuilder에 판매상태 조건을 동적으로 추가하는 것을 확인 할 수 있다.
 
         Pageable pageable = PageRequest.of(0, 5);
-        // 데이터를 페이징해 조회하도록 PageRequest.of() 메소드를 이용해 Pageable 객체를 생성한다.
-        // 첫 번째 인자는 조회할 페이지의 번호, 두 번째 인자는 한 페이지당 조회할 데이터의 개수를 넣어준다.
         Page<Item> itemPagingResult = itemRepository.findAll(booleanBuilder, pageable);
-        /**
-         *  QueryDslPredicateExecutor 인터페이스에서 정의한 findAll() 메소드를 이용해 조거에 맞는 데이터를 Page 객체로 받아온다.
-         * */
         System.out.println("total elements : " + itemPagingResult.getTotalElements());
 
         List<Item> resultItemList = itemPagingResult.getContent();
-        for(Item reusltItem : resultItemList) {
-            System.out.println(resultItemList.toString());
+        for(Item resultItem : resultItemList) {
+            System.out.println(resultItem.toString());
         }
-
     }
 
 
